@@ -1,10 +1,14 @@
 /* School Map Uploader — Leaflet + SheetJS
- * Vereist kolommen: Naam van de School, Longitude, Latitude
+ * Ondersteunt flexibele kolomnamen en komma/punt als decimaal.
+ * Herkent o.a. (hoofdletterongevoelig):
+ *  - Naam: 'Naam van de School', 'NAAM SCHOOL', 'Naam school', 'Schoolnaam', 'Naam'
+ *  - Latitude: 'Latitude', 'LATITUDE', 'Breedtegraad', 'Lat', 'Y'
+ *  - Longitude: 'Longitude', 'LONGITUDE', 'Lengtegraad', 'Lon', 'X'
  */
 let map, markersLayer;
 
 function initMap(){
-  map = L.map('map').setView([52.2, 5.3], 7); // Nederland中心
+  map = L.map('map').setView([52.2, 5.3], 7); // Nederland
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
@@ -18,27 +22,115 @@ function setStatus(msg, isError=false){
   el.style.color = isError ? '#ffdddd' : '#ffffff';
 }
 
+// Normaliseer getalstrings naar parseFloat-compatibel formaat.
+// - Trimt spaties
+// - Vervangt komma door punt (voor decimale notatie)
+// - Verwijdert niet-numerieke tekens behalve - en .
+function normalizeNumber(val){
+  if (val === null || val === undefined) return NaN;
+  const s = String(val).trim()
+    .replace(/,/g, '.')
+    .replace(/[^\d\.\-]/g, '');
+  const num = parseFloat(s);
+  return Number.isFinite(num) ? num : NaN;
+}
+
+// Zoek kolommen case-insensitive met kandidatenlijst.
+// keysMap: { lowerKey: originalKey }
+function findColumn(keysMap, candidates){
+  for (const cand of candidates){
+    const k = cand.toLowerCase();
+    if (k in keysMap) return keysMap[k];
+  }
+  return null;
+}
+
+// Probeer lat/lon te detecteren op basis van waardebereik in de eerste paar rijen.
+function detectLatLonFromRows(rows, keys){
+  const firstRows = rows.slice(0, Math.min(rows.length, 50));
+  let bestLat = null, bestLon = null;
+
+  for (const key of keys){
+    let latLike = 0, lonLike = 0;
+    for (const r of firstRows){
+      const v = normalizeNumber(r[key]);
+      if (!Number.isFinite(v)) continue;
+      if (v >= -90 && v <= 90) latLike++;
+      if (v >= -180 && v <= 180) lonLike++;
+    }
+    // Een kolom die vaak binnen [-90,90] valt is waarschijnlijk latitude
+    if (latLike > lonLike && latLike > 0){
+      bestLat = bestLat ?? key;
+    } else if (lonLike >= latLike && lonLike > 0){
+      bestLon = bestLon ?? key;
+    }
+  }
+  return { lat: bestLat, lon: bestLon };
+}
+
+function resolveColumns(rows){
+  if (!rows || !rows.length) return { nameKey: null, latKey: null, lonKey: null };
+
+  // Maak een map van genormaliseerde headers naar originele headers
+  const originalKeys = Object.keys(rows[0] || {});
+  const keysMap = {};
+  originalKeys.forEach(k => {
+    if (k == null) return;
+    keysMap[String(k).trim().toLowerCase()] = k;
+  });
+
+  const nameCandidates = [
+    'Naam van de School','NAAM VAN DE SCHOOL','NAAM SCHOOL','Naam school',
+    'Schoolnaam','School','Naam','Naam_school','Naam-van-de-school'
+  ];
+  const latCandidates = [
+    'Latitude','LATITUDE','Breedtegraad','Lat','LAT','Y','y','noorderbreedte'
+  ];
+  const lonCandidates = [
+    'Longitude','LONGITUDE','Lengtegraad','Lon','LON','X','x','oosterlengte'
+  ];
+
+  let nameKey = findColumn(keysMap, nameCandidates);
+  let latKey = findColumn(keysMap, latCandidates);
+  let lonKey = findColumn(keysMap, lonCandidates);
+
+  // Als lat/lon niet gevonden, probeer op basis van waardebereik
+  if (!latKey || !lonKey){
+    const det = detectLatLonFromRows(rows, originalKeys);
+    latKey = latKey || det.lat;
+    lonKey = lonKey || det.lon;
+  }
+
+  return { nameKey, latKey, lonKey };
+}
+
 function parseRowsToMarkers(rows){
   markersLayer.clearLayers();
   const bounds = [];
   let count = 0;
 
+  const { nameKey, latKey, lonKey } = resolveColumns(rows);
+
+  if (!latKey || !lonKey){
+    setStatus('Kon kolommen voor Latitude/Longitude niet vinden. Controleer de koppen of waarden.', true);
+    return;
+  }
+  if (!nameKey){
+    // Naam is optioneel voor plotten; gebruik dan een fallback label
+    console.warn('Naam-kolom niet gevonden; gebruik fallback labels.');
+  }
+
   rows.forEach((row, idx) => {
-    const name = row['Naam van de School'];
-    const lonRaw = row['Longitude'];
-    const latRaw = row['Latitude'];
+    const name = nameKey ? row[nameKey] : `Locatie ${idx+1}`;
+    const lon = normalizeNumber(row[lonKey]);
+    const lat = normalizeNumber(row[latKey]);
 
-    if (name == null || lonRaw == null || latRaw == null) return;
+    if (!Number.isFinite(lon) || !Number.isFinite(lat)) return;
 
-    const lon = parseFloat(String(lonRaw).toString().replace(',', '.'));
-    const lat = parseFloat(String(latRaw).toString().replace(',', '.'));
-
-    if (Number.isFinite(lon) && Number.isFinite(lat)) {
-      const m = L.marker([lat, lon]).bindPopup(`<strong>${String(name)}</strong>`);
-      m.addTo(markersLayer);
-      bounds.push([lat, lon]);
-      count++;
-    }
+    const m = L.marker([lat, lon]).bindPopup(`<strong>${String(name ?? '')}</strong>`);
+    m.addTo(markersLayer);
+    bounds.push([lat, lon]);
+    count++;
   });
 
   if (count === 0){
@@ -79,12 +171,15 @@ async function handleFile(file){
 
 // Eenvoudige CSV parser → array of objects (kolomnamen uit eerste regel)
 function CSVToArrayOfObjects(csv){
-  const lines = csv.split(/\r?\n/).filter(Boolean);
+  // Ondersteun zowel komma- als puntkomma-gescheiden CSV rudimentair
+  const lines = csv.split(/\r?\n/).filter(l => l.trim().length);
   if (!lines.length) return [];
-  const headers = lines[0].split(',').map(h => h.trim());
+  let delimiter = ',';
+  if (lines[0].includes(';') && !lines[0].includes(',')) delimiter = ';';
+  const headers = lines[0].split(delimiter).map(h => h.trim());
   const rows = [];
   for (let i=1;i<lines.length;i++){
-    const cols = lines[i].split(','); // basic; voor complex CSV gebruik bij voorkeur .xlsx
+    const cols = lines[i].split(delimiter);
     const obj = {};
     headers.forEach((h, idx) => obj[h] = cols[idx] !== undefined ? cols[idx].trim() : null);
     rows.push(obj);
@@ -93,11 +188,11 @@ function CSVToArrayOfObjects(csv){
 }
 
 function loadSample(){
-  // Kleine ingebouwde dataset als fallback (Amsterdam / Leeuwarden / Groningen)
+  // Voorbeelddata met verschillende header-varianten en komma's
   const rows = [
-    { 'Naam van de School': 'OBS De Start', 'Longitude': 4.8952, 'Latitude': 52.3702 },
-    { 'Naam van de School': 'CBS De Wissel', 'Longitude': 5.7999, 'Latitude': 53.2012 },
-    { 'Naam van de School': 'RSG Noorderhoek', 'Longitude': 6.5665, 'Latitude': 53.2194 },
+    { 'NAAM SCHOOL': 'OBS De Start', 'LONGITUDE': '4,8952', 'LATITUDE': '52,3702' },
+    { 'NAAM SCHOOL': 'CBS De Wissel', 'LONGITUDE': '5,7999', 'LATITUDE': '53,2012' },
+    { 'NAAM SCHOOL': 'RSG Noorderhoek', 'LONGITUDE': '6,5665', 'LATITUDE': '53,2194' },
   ];
   parseRowsToMarkers(rows);
 }
