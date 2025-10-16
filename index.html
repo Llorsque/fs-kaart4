@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>School Kaart — Excel Upload</title>
-  <meta name="description" content="Upload een Excel-bestand met Schoolnaam, Longitude en Latitude en plot de punten op een kaart." />
+  <meta name="description" content="Upload een Excel-bestand met Schoolnaam, Longitude en Latitude en plot de punten op een kaart met jaarfilters." />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,14 +22,35 @@
   <header class="site-header">
     <div class="container">
       <h1>School Kaart</h1>
-      <p>Upload een Excel-bestand (.xlsx) met drie kolommen: <strong>Naam van de School</strong>, <strong>Longitude</strong>, <strong>Latitude</strong>.</p>
+      <p>Upload een Excel-bestand (.xlsx) met kolommen voor <strong>Naam</strong>, <strong>Longitude</strong>, <strong>Latitude</strong>, en (optioneel) de jaren <code>2022/2023</code>, <code>2023/2024</code>, <code>2024/2025</code>, <code>2025/2026</code> (waarde: <em>JA</em> of <em>NEE</em>).</p>
       <div class="uploader">
         <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" />
         <button id="loadSample" type="button" class="btn-secondary">Laad voorbeelddata</button>
       </div>
-      <p class="help">
-        Tip: Je kunt komma (,) of punt (.) als decimaalteken gebruiken voor coördinaten.
-      </p>
+
+      <div class="filters">
+        <div class="filter-dropdown" id="yearFilter">
+          <button type="button" class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+            Jaren filteren
+            <span class="selection" id="yearSelection">(alles)</span>
+          </button>
+          <div class="dropdown-menu" role="menu" aria-label="Jaar selectie">
+            <label><input type="checkbox" value="2022/2023" checked> 2022/2023</label>
+            <label><input type="checkbox" value="2023/2024" checked> 2023/2024</label>
+            <label><input type="checkbox" value="2024/2025" checked> 2024/2025</label>
+            <label><input type="checkbox" value="2025/2026" checked> 2025/2026</label>
+            <div class="dropdown-actions">
+              <button type="button" class="btn-link" id="selectAll">Alles</button>
+              <button type="button" class="btn-link" id="selectNone">Niets</button>
+              <button type="button" class="btn-apply" id="applyFilter">Toepassen</button>
+            </div>
+          </div>
+        </div>
+        <p class="help small">
+          Pins worden alleen getoond als in de geselecteerde jaren in de rij <strong>JA</strong> staat.
+        </p>
+      </div>
+
       <div id="status" aria-live="polite"></div>
     </div>
   </header>
@@ -40,14 +61,15 @@
       <summary>Bestandsformaten & kolomnamen</summary>
       <ul>
         <li>Ondersteund: <code>.xlsx</code> (aanbevolen), <code>.xls</code> en <code>.csv</code>.</li>
-        <li>Vereiste kolommen (exacte namen): <code>Naam van de School</code>, <code>Longitude</code>, <code>Latitude</code>.</li>
+        <li>Flexibele koppen (hoofdletterongevoelig) voor naam/lat/lon. Jaren moeten exact heten: <code>2022/2023</code>, <code>2023/2024</code>, <code>2024/2025</code>, <code>2025/2026</code>.</li>
+        <li>Coördinaten mogen komma of punt als decimaalteken hebben.</li>
       </ul>
     </details>
   </main>
 
   <footer class="site-footer">
     <div class="container">
-      <small>© 2025 — School Kaart Upload • Gemaakt met Leaflet &amp; SheetJS</small>
+      <small>© 2025 — School Kaart Upload • Leaflet &amp; SheetJS</small>
     </div>
   </footer>
 

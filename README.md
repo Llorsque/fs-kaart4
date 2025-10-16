@@ -1,33 +1,24 @@
 # School Kaart — Excel Upload (GitHub Pages)
 
-Upload een Excel- of CSV-bestand met drie kolommen — **Naam van de School**, **Longitude**, **Latitude** — en plot de punten direct op een Leaflet-kaart.
+Upload een Excel- of CSV-bestand met **Naam**, **Longitude**, **Latitude** en (optioneel) vier jaar-kolommen — `2022/2023`, `2023/2024`, `2024/2025`, `2025/2026`.
+De kaart toont pins voor rijen waar in ten minste één van de **geselecteerde jaren** de waarde **JA** is.
 
-## Belangrijk
-- Je kunt **komma (,) of punt (.)** als decimaalteken gebruiken bij coördinaten.
-- CSV met **;** als scheidingsteken wordt ook herkend (basic). Voor complexere CSV: gebruik `.xlsx`.
+## Gebruik
+1. Open de site en upload je Excel (`.xlsx`) of CSV.
+2. Open **Jaren filteren** en vink één of meerdere schooljaren aan.
+3. Klik **Toepassen**. Alleen rijen met **JA** onder de geselecteerde jaren worden getoond.
+4. Klik op een pin om de schoolnaam te zien.
 
-## Snel starten
-1. Maak een nieuwe GitHub repository aan (bijv. `school-map-uploader`).
-2. Upload alle bestanden in de `main` branch.
-3. Ga naar **Settings → Pages** en kies **Deploy from a branch**, branch = `main`, folder = `/ (root)`.
-4. Open de gegenereerde URL en upload je eigen bestand.
+## Kolommen
+- Naam: flexibele koppen, o.a. `NAAM SCHOOL`, `Naam van de School`, `Schoolnaam`, `Naam`.
+- Latitude / Longitude: flexibele koppen en komma/punt als decimaal.
+- Jaren (exacte koppen): `2022/2023`, `2023/2024`, `2024/2025`, `2025/2026` met waarden **JA** of **NEE**.
 
-## Kolomnamen (exact)
-- `Naam van de School`
-- `Longitude`
-- `Latitude`
+## CSV
+Puntkomma-gescheiden CSV wordt basic ondersteund. Voor complexere CSV, gebruik bij voorkeur `.xlsx`.
 
 ## Privacy
-Alle verwerking gebeurt in de browser. Er worden geen bestanden geüpload naar een server.
+Alle verwerking gebeurt in de browser (client-side).
 
 ## Licentie
 MIT
-
-
-## Flexibele kolomnamen
-De app herkent veelvoorkomende varianten (hoofdletterongevoelig):
-- Naam: `Naam van de School`, `NAAM SCHOOL`, `Naam school`, `Schoolnaam`, `Naam`
-- Latitude: `Latitude`, `LATITUDE`, `Breedtegraad`, `Lat`, `Y`
-- Longitude: `Longitude`, `LONGITUDE`, `Lengtegraad`, `Lon`, `X`
-
-Als een naamkolom ontbreekt, wordt een fallback-naam gebruikt (bijv. "Locatie 1").
