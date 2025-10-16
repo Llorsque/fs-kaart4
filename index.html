@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>School Kaart — Excel Upload</title>
+  <meta name="description" content="Upload een Excel-bestand met Schoolnaam, Longitude en Latitude en plot de punten op een kaart." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <!-- App CSS -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1>School Kaart</h1>
+      <p>Upload een Excel-bestand (.xlsx) met drie kolommen: <strong>Naam van de School</strong>, <strong>Longitude</strong>, <strong>Latitude</strong>.</p>
+      <div class="uploader">
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" />
+        <button id="loadSample" type="button" class="btn-secondary">Laad voorbeelddata</button>
+      </div>
+      <p class="help">
+        Tip: Gebruik decimale graden voor coördinaten. Voorbeeld: Longitude <code>5.1214</code>, Latitude <code>52.0907</code>.
+      </p>
+      <div id="status" aria-live="polite"></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="map"></div>
+    <details class="notes">
+      <summary>Bestandsformaten & kolomnamen</summary>
+      <ul>
+        <li>Ondersteund: <code>.xlsx</code> (aanbevolen), <code>.xls</code> en <code>.csv</code>.</li>
+        <li>Vereiste kolommen (exacte namen): <code>Naam van de School</code>, <code>Longitude</code>, <code>Latitude</code>.</li>
+      </ul>
+    </details>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>© 2025 — School Kaart Upload • Gemaakt met Leaflet &amp; SheetJS</small>
+    </div>
+  </footer>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- SheetJS (XLSX) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- App JS -->
+  <script src="app.js"></script>
+</body>
+</html>
