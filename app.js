@@ -240,7 +240,7 @@ function initFilterUI(){
     const checked = Array.from(menu.querySelectorAll('input[type="checkbox"]:checked')).map(i => i.value);
     if (checked.length === 0) el.textContent = '(niets)';
     else if (checked.length === YEAR_KEYS.length) el.textContent = '(alles)';
-    else el.textContent = checked.join(', ');
+    else el.textContent = YEAR_KEYS.filter(y => checked.includes(y)).join(', ');
   }
 }
 
