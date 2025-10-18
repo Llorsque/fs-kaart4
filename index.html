@@ -1,49 +1,71 @@
-<!DOCTYPE html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>School Kaart — Excel Upload</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="styles.css"></head><body>
-<header class="site-header"><div class="container"><h1>School Kaart</h1></div></header>
-<main class="container"><div class="layout">
-<aside class="sidebar">
-  <section class="panel"><h2 class="panel-title">Bestand uploaden</h2>
-    <div class="uploader"><input type="file" id="fileInput" accept=".xlsx,.xls,.csv" /></div>
-    <div id="status" aria-live="polite"></div>
-  </section>
-  <section class="panel"><h2 class="panel-title">Filters</h2>
-    <div class="filters">
-      <div class="filter-dropdown" id="yearFilter">
-        <button type="button" class="dropdown-toggle">Jaren filteren <span class="selection" id="yearSelection">(alles)</span></button>
-        <div class="dropdown-menu">
-          <label><input type="checkbox" value="2022/2023" checked> 2022/2023</label>
-          <label><input type="checkbox" value="2023/2024" checked> 2023/2024</label>
-          <label><input type="checkbox" value="2024/2025" checked> 2024/2025</label>
-          <label><input type="checkbox" value="2025/2026" checked> 2025/2026</label>
-          <div class="dropdown-actions">
-            <button type="button" class="btn-link" id="selectAll">Alles</button>
-            <button type="button" class="btn-link" id="selectNone">Niets</button>
-            <button type="button" class="btn-apply" id="applyFilter">Toepassen</button>
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>School Kaart — Excel Upload</title>
+  <meta name="description" content="Upload Excel en plot scholen als pins of heatmap met jaarfilter." />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1>School Kaart</h1>
+      <p>Upload een Excel (.xlsx/.xls) of CSV met <strong>Naam</strong>, <strong>Longitude</strong>, <strong>Latitude</strong> en (optioneel) <strong>2022/2023</strong> t/m <strong>2025/2026</strong>.</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="layout">
+      <aside class="sidebar">
+        <section class="panel">
+          <h2>Bestand uploaden</h2>
+          <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" />
+          <p class="hint">Komma (,) of punt (.) in coördinaten zijn beide oké.</p>
+          <div id="status" aria-live="polite"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Filters</h2>
+          <div class="years">
+            <label><input type="checkbox" name="year" value="2022/2023" checked> 2022/2023</label>
+            <label><input type="checkbox" name="year" value="2023/2024" checked> 2023/2024</label>
+            <label><input type="checkbox" name="year" value="2024/2025" checked> 2024/2025</label>
+            <label><input type="checkbox" name="year" value="2025/2026" checked> 2025/2026</label>
           </div>
-        </div>
+          <button id="applyFilter" class="btn">Toepassen</button>
+          <p class="hint">Toont alleen rijen met &gt; 0 (of JA) in geselecteerde jaren.</p>
+        </section>
+
+        <section class="panel">
+          <h2>Weergave</h2>
+          <div class="view-toggle">
+            <label><input type="radio" name="viewmode" value="pins" checked> Pins</label>
+            <label><input type="radio" name="viewmode" value="heat"> Heatmap</label>
+          </div>
+          <div class="legend">
+            <div class="legend-bar"></div>
+            <div class="legend-scale"><span>0 (groen)</span><span>150 (rood)</span></div>
+          </div>
+        </section>
+      </aside>
+
+      <div class="map-wrap">
+        <div id="map"></div>
       </div>
     </div>
-  </section>
-  <section class="panel"><h2 class="panel-title">Weergave</h2>
-    <div class="view-toggle">
-      <label><input type="radio" name="viewmode" value="pins" checked> Pins</label>
-      <label><input type="radio" name="viewmode" value="heat"> Heatmap</label>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>© 2025 — School Kaart</small>
     </div>
-  </section>
-</aside>
-<div class="map-wrap">
-  <div id="map"></div>
-  <div class="heat-legend" id="heatLegend" style="display:none;">
-    <div>Schaal: laag → hoog</div>
-    <div class="bar"></div><div class="legend-scale"><span>min: <strong data-legend-min>0</strong></span><span style="float:right">max: <strong data-legend-max>150</strong></span></div>
-  </div>
-</div>
-</div></main>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-<script src="app.js"></script>
-</body></html>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
