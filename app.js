@@ -141,8 +141,8 @@ function render(){
       normalized = heatPoints.map(([lat, lon, t]) => [lat, lon, Math.min(1, (t || 0) / (maxT || 1))]);
     }
 
-    heatLayer.setLatLngs(normalized);
     if (!map.hasLayer(heatLayer)) heatLayer.addTo(map);
+    if (normalized.length === 0) { heatLayer.setLatLngs([]); heatLayer.redraw(); } else { heatLayer.setLatLngs(normalized); heatLayer.redraw(); }
   } else {
     if (map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
   }
