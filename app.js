@@ -17,7 +17,7 @@ function initMap(){
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
   }).addTo(map);
   markersLayer = L.layerGroup().addTo(map);
-  heatLayer = L.heatLayer([], { radius: 25, blur: 18, maxZoom: 17 });
+  heatLayer = L.heatLayer([], { radius: 25, blur: 18, maxZoom: 17, gradient: { 0.0: 'green', 0.5: 'yellow', 1.0: 'red' } });
   initFilterUI();
   initViewToggle();
 }
@@ -176,11 +176,21 @@ function parseRowsToLayers(rows){
   });
 
   if (mode === 'heat'){
-    const normalized = heatPoints.map(([lat, lon, t]) => [lat, lon, maxTotal > 0 ? (t / maxTotal) : 0.5]);
+    const MAX_SCALE = 150;
+    const normalized = heatPoints.map(([lat, lon, t]) => {
+      const intensity = Math.max(0, Math.min(1, (t || 0) / MAX_SCALE));
+      return [lat, lon, intensity];
+    });
     heatLayer.setLatLngs(normalized);
     if (!map.hasLayer(heatLayer)) heatLayer.addTo(map);
     const legend = document.getElementById('heatLegend');
-    if (legend) legend.style.display = 'block';
+    if (legend) {
+      legend.style.display = 'block';
+      const minSpan = legend.querySelector('[data-legend-min]');
+      const maxSpan = legend.querySelector('[data-legend-max]');
+      if (minSpan) minSpan.textContent = '0';
+      if (maxSpan) maxSpan.textContent = '150';
+    }
   } else {
     if (map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
     const legend = document.getElementById('heatLegend');
