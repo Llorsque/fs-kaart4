@@ -1,5 +1,5 @@
 /* School Map Uploader — sturdy build with visible filters and Heatmap Option A */
-let map, markersLayer, heatLayer;
+let map, markersLayer, heatLayer = null;
 let originalRows = [];
 const YEAR_KEYS = ["2022/2023","2023/2024","2024/2025","2025/2026"];
 
@@ -15,12 +15,24 @@ function initMap(){
     attribution: '&copy; OpenStreetMap'
   }).addTo(map);
   markersLayer = L.layerGroup().addTo(map);
-  heatLayer = L.heatLayer([], {
-    radius: 40,
-    blur: 28,
-    maxZoom: 17,
-    gradient: { 0.0: 'green', 0.5: 'yellow', 1.0: 'red' }
-  });
+  }
+
+
+function ensureHeatLayer(){
+  if (typeof L === 'undefined' || typeof L.heatLayer !== 'function'){
+    setStatus('Heatmap plugin (leaflet-heat) kon niet worden geladen. Controleer je internetverbinding of CDN.', true);
+    return false;
+  }
+  if (!heatLayer){
+    heatLayer = L.heatLayer([], {
+      radius: 40,
+      blur: 28,
+      maxZoom: 17,
+      gradient: { 0.0: 'green', 0.5: 'yellow', 1.0: 'red' }
+    });
+  }
+  if (!map.hasLayer(heatLayer)) heatLayer.addTo(map);
+  return true;
 }
 
 function bindUI(){
@@ -125,6 +137,7 @@ function render(){
   });
 
   if (mode === 'heat'){
+    if (!ensureHeatLayer()) { return; }
     // Option A: fixed 0–150, visibility floor, fallback autoscale
     const MAX_SCALE = 150;
     const MIN_INTENSITY = 0.18;
@@ -144,7 +157,7 @@ function render(){
     if (!map.hasLayer(heatLayer)) heatLayer.addTo(map);
     if (normalized.length === 0) { heatLayer.setLatLngs([]); heatLayer.redraw(); } else { heatLayer.setLatLngs(normalized); heatLayer.redraw(); }
   } else {
-    if (map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
+    if (heatLayer && map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
   }
 
   if (bounds.length) map.fitBounds(bounds, { padding: [30, 30] });
