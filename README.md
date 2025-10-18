@@ -1,17 +1,23 @@
+# School Kaart — Excel Upload (Pins & Heatmap) — Stabiele versie
 
-## Zelf de heatmap-schaal bepalen
-Voeg twee (optionele) kolommen toe (hoofdletterongevoelig):
-- `SCHAAL_MIN` — ondergrens van de schaal (bijv. 0)
-- `SCHAAL_MAX` — bovengrens van de schaal (bijv. 50)
+Upload een Excel- of CSV-bestand met **Naam**, **Longitude**, **Latitude** en (optioneel) vier jaar-kolommen — `2022/2023`, `2023/2024`, `2024/2025`, `2025/2026`.
+Je kunt schakelen tussen **Pins** en **Heatmap**. De heatmap weegt per rij de **aantallen** in de **geselecteerde jaren** (JA=1). Schaal wordt automatisch bepaald o.b.v. de hoogste waarde.
 
-De app gebruikt de **eerste niet-lege numerieke waarde** in deze kolommen als schaal. Als je ze weglaat, wordt de schaal automatisch bepaald.
+## Gebruik
+1. Upload je Excel (`.xlsx`) of CSV.
+2. Kies één of meerdere schooljaren via **Jaren filteren** → **Toepassen**.
+3. Wissel weergave: **Pins** of **Heatmap**.
+4. Klik op een pin om de schoolnaam te zien.
 
-**Excel-indeling (voorbeeldkolommen):**
-| NAAM SCHOOL | LONGITUDE | LATITUDE | 2022/2023 | 2023/2024 | 2024/2025 | 2025/2026 | SCHAAL_MIN | SCHAAL_MAX |
-|---|---|---|---:|---:|---:|---:|---:|---:|
-| OBS De Start | 4,8952 | 52,3702 | 10 | 12 | 8  | 6  | 0 | 30 |
-| CBS De Wissel | 5,7999 | 53,2012 | 5  | 0  | 14 | 9  |   |    |
-| RSG Noorderhoek | 6,5665 | 53,2194 | 0  | 0  | 0  | 20 |   |    |
-| CSG Comenius | 5,1234 | 52,2345 | 18 | 22 | 30 | 5  |   |    |
+## Kolommen
+- Naam (flexibel): `NAAM SCHOOL`, `Naam van de School`, `Schoolnaam`, `Naam`.
+- Coördinaten: flexibele koppen; komma/punt-decimaal oké.
+- Jaren (exact): `2022/2023`, `2023/2024`, `2024/2025`, `2025/2026` → getal of JA/NEE.
 
-> **Werking:** Intensiteit = (waarde - SCHAAL_MIN) / (SCHAAL_MAX - SCHAAL_MIN), begrensd tussen 0 en 1.
+## Privacy
+Client-side; geen uploads naar een server.
+
+## Publiceren op GitHub Pages
+- Upload alle bestanden naar een repo (root) en activeer Pages via **Settings → Pages → Deploy from a branch**.
+
+MIT

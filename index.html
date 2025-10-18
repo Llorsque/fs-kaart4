@@ -1,30 +1,121 @@
-<!doctype html><html><head><meta charset='utf-8'><title>School Kaart</title><link rel='stylesheet' href='styles.css'><link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'></head><body><div class='container'><div class='layout'><aside class='sidebar'><section class='panel'><input type='file' id='fileInput'></section><section class="panel">
-  <h2 class="panel-title">Filters</h2>
-  <div class="filters">
-    <div class="filter-dropdown" id="yearFilter">
-      <button type="button" class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">
-        Jaren filteren
-        <span class="selection" id="yearSelection">(alles)</span>
-      </button>
-      <div class="dropdown-menu" role="menu" aria-label="Jaar selectie">
-        <label><input type="checkbox" value="2022/2023" checked> 2022/2023</label>
-        <label><input type="checkbox" value="2023/2024" checked> 2023/2024</label>
-        <label><input type="checkbox" value="2024/2025" checked> 2024/2025</label>
-        <label><input type="checkbox" value="2025/2026" checked> 2025/2026</label>
-        <div class="dropdown-actions">
-          <button type="button" class="btn-link" id="selectAll">Alles</button>
-          <button type="button" class="btn-link" id="selectNone">Niets</button>
-          <button type="button" class="btn-apply" id="applyFilter">Toepassen</button>
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>School Kaart — Excel Upload</title>
+  <meta name="description" content="Upload een Excel-bestand met Schoolnaam, Longitude en Latitude en plot de punten of heatmap op een kaart met jaarfilters." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <!-- App CSS -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1>School Kaart</h1>
+      <p>Upload een Excel-bestand (.xlsx) met kolommen voor <strong>Naam</strong>, <strong>Longitude</strong>, <strong>Latitude</strong>, en (optioneel) de jaren <code>2022/2023</code>, <code>2023/2024</code>, <code>2024/2025</code>, <code>2025/2026</code> (waarde: aantallen of <em>JA</em>/<em>NEE</em>).</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="layout">
+      <!-- Sidebar left -->
+      <aside class="sidebar">
+        <section class="panel">
+          <h2 class="panel-title">Bestand uploaden</h2>
+          <div class="uploader">
+            <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" />
+            <button id="loadSample" type="button" class="btn-secondary">Laad voorbeelddata</button>
+          </div>
+          <p class="help">
+            Komma (,) of punt (.) als decimaalteken zijn beide oké.
+          </p>
+          <div id="status" aria-live="polite"></div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel-title">Filters</h2>
+          <div class="filters">
+            <div class="filter-dropdown" id="yearFilter">
+              <button type="button" class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+                Jaren filteren
+                <span class="selection" id="yearSelection">(alles)</span>
+              </button>
+              <div class="dropdown-menu" role="menu" aria-label="Jaar selectie">
+                <label><input type="checkbox" value="2022/2023" checked> 2022/2023</label>
+                <label><input type="checkbox" value="2023/2024" checked> 2023/2024</label>
+                <label><input type="checkbox" value="2024/2025" checked> 2024/2025</label>
+                <label><input type="checkbox" value="2025/2026" checked> 2025/2026</label>
+                <div class="dropdown-actions">
+                  <button type="button" class="btn-link" id="selectAll">Alles</button>
+                  <button type="button" class="btn-link" id="selectNone">Niets</button>
+                  <button type="button" class="btn-apply" id="applyFilter">Toepassen</button>
+                </div>
+              </div>
+            </div>
+            <p class="help small">
+              Pins/heatmap tonen alleen rijen die in de geselecteerde jaren > 0 (of JA) hebben.
+            </p>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel-title">Weergave</h2>
+          <div class="view-toggle">
+            <label><input type="radio" name="viewmode" value="pins" checked> Pins</label>
+            <label><input type="radio" name="viewmode" value="heat"> Heatmap</label>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel-title">Info</h2>
+          <details class="notes">
+            <summary>Bestandsformaten & kolomnamen</summary>
+            <ul>
+              <li>Ondersteund: <code>.xlsx</code> (aanbevolen), <code>.xls</code>, <code>.csv</code>.</li>
+              <li>Flexibele koppen (hoofdletterongevoelig) voor naam/lat/lon. Jaren moeten exact heten: <code>2022/2023</code>, <code>2023/2024</code>, <code>2024/2025</code>, <code>2025/2026</code>.</li>
+            </ul>
+          </details>
+        </section>
+      </aside>
+
+      <!-- Map right -->
+      <div class="map-wrap">
+        <div id="map"></div>
+        <div class="heat-legend" id="heatLegend" style="display:none;">
+          <div>Schaal: laag → hoog</div>
+          <div class="bar"></div>
         </div>
       </div>
     </div>
-  </div>
-</section>
-<section class="panel">
-  <h2 class="panel-title">Weergave</h2>
-  <div class="view-toggle">
-    <label><input type="radio" name="viewmode" value="pins" checked> Pins</label>
-    <label><input type="radio" name="viewmode" value="heat"> Heatmap</label>
-  </div>
-</section>
-</aside><div class='map-wrap'><div id='map'></div></div></div></div><script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script><script src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'></script><script src='app.js'></script></body></html>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>© 2025 — School Kaart Upload • Leaflet &amp; SheetJS</small>
+    </div>
+  </footer>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- SheetJS (XLSX) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- Leaflet.heat for heatmap -->
+  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+  <!-- App JS -->
+  <script src="app.js"></script>
+</body>
+</html>
