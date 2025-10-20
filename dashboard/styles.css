@@ -1,0 +1,44 @@
+
+:root{
+  --ink:#0f172a; --muted:#64748b; --bg:#f8fafc; --panel:#ffffff; --border:#e2e8f0; --accent:#2563eb;
+}
+*{box-sizing:border-box}
+body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; color:var(--ink); background:var(--bg)}
+.container{width:min(1200px,94vw); margin-inline:auto}
+.site-header{background:#fff; border-bottom:1px solid var(--border); padding:1.1rem 0 .8rem}
+.site-header h1{margin:0 0 .25rem; font-size:1.9rem}
+.muted{color:var(--muted)} .small{font-size:.9rem}
+
+.layout{display:grid; grid-template-columns:340px 1fr; gap:1rem; margin:1rem 0 1.2rem}
+.sidebar{position:sticky; top:10px}
+.panel{background:var(--panel); border:1px solid var(--border); border-radius:.8rem; padding:1rem; margin-bottom:1rem; box-shadow:0 1px 8px rgba(0,0,0,.04)}
+.panel h2{margin:.1rem 0 .6rem; font-size:1.05rem}
+.row{display:flex; gap:.6rem; align-items:center; margin:.35rem 0}
+
+.btn{background:var(--accent); color:#fff; border:none; padding:.5rem .8rem; border-radius:.5rem; cursor:pointer; margin-top:.5rem}
+.btn-outline{background:#fff; color:var(--ink); border:1px solid var(--border); padding:.45rem .7rem; border-radius:.5rem; cursor:pointer; margin-left:.5rem}
+.btn:hover{opacity:.92}.btn-outline:hover{background:#f1f5f9}
+
+.kpis{display:grid; grid-template-columns:1fr; gap:.6rem}
+.kpi{border:1px solid var(--border); border-radius:.6rem; padding:.6rem .8rem; background:#fff}
+.kpi .label{color:var(--muted); font-size:.85rem}
+.kpi .value{font-size:1.4rem; font-weight:700}
+.kpi .delta{font-size:.9rem}
+.delta.up{color:#16a34a}.delta.down{color:#ef4444}.delta.flat{color:#64748b}
+
+.content .cards{display:grid; grid-template-columns:1fr; gap:1rem}
+.card{background:#fff; border:1px solid var(--border); border-radius:.8rem; padding:1rem; box-shadow:0 1px 8px rgba(0,0,0,.04)}
+
+.table-wrap{overflow:auto}
+table{border-collapse:collapse; width:100%; min-width:700px}
+th,td{border:1px solid var(--border); padding:.5rem; text-align:left}
+th{background:#f1f5f9}
+
+@media (min-width: 1000px){
+  .content .cards{grid-template-columns:1fr 1fr}
+  .content .cards .card:last-child{grid-column:1/-1}
+}
+@media (max-width: 900px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{position:static}
+}

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard Scholen — Jaarinzichten</title>
+  <meta name="description" content="Upload Excel/CSV met jaarkolommen en bekijk totaal, deelname en groei per jaar." />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1>Dashboard Scholen</h1>
+      <p class="muted">Upload je Excel/CSV met kolommen <strong>NAAM SCHOOL</strong>, <strong>LONGITUDE</strong>, <strong>LATITUDE</strong> en de jaren <strong>2022/2023</strong> t/m <strong>2025/2026</strong>. Cellen bevatten <em>NEE</em> of een <em>getal</em>.</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="layout">
+      <aside class="sidebar">
+        <section class="panel">
+          <h2>Bestand</h2>
+          <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" />
+          <button id="loadSample" class="btn-outline" type="button">Laad voorbeeld</button>
+          <p class="muted small">Komma of punt in getallen is oké.</p>
+          <div id="status" class="muted" aria-live="polite"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Opties</h2>
+          <label class="row">
+            <input type="checkbox" id="treatJaAsOne" />
+            <span>Als er <b>JA</b> staat, tel als 1 (failsafe)</span>
+          </label>
+          <label class="row">
+            <input type="checkbox" id="ignoreZero" />
+            <span>Negeer exacte nul (alleen &gt;0 telt als deelname)</span>
+          </label>
+          <button id="recalc" class="btn" type="button">Bereken opnieuw</button>
+        </section>
+
+        <section class="panel">
+          <h2>Overzicht</h2>
+          <div id="kpis" class="kpis">
+            <!-- KPI cards filled by JS -->
+          </div>
+        </section>
+      </aside>
+
+      <section class="content">
+        <div class="cards">
+          <div class="card">
+            <h3>Totaal per jaar</h3>
+            <canvas id="chartTotals"></canvas>
+          </div>
+          <div class="card">
+            <h3>Deelname (aantal scholen) per jaar</h3>
+            <canvas id="chartParticipants"></canvas>
+          </div>
+          <div class="card">
+            <h3>Groei % jaar op jaar</h3>
+            <canvas id="chartYoY"></canvas>
+          </div>
+        </div>
+
+        <details class="panel" id="preview" open>
+          <summary><strong>Datapreview</strong> (eerste 20 rijen)</summary>
+          <div id="tablePreview" class="table-wrap"></div>
+        </details>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>© 2025 — Dashboard Scholen</small>
+    </div>
+  </footer>
+
+  <!-- Libs -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- App -->
+  <script src="app.js"></script>
+</body>
+</html>
