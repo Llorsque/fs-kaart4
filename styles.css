@@ -17,9 +17,7 @@ html,body{height:100%} body{margin:0;font-family:system-ui,-apple-system,Segoe U
 .btn-outline{background:#fff;color:#0f172a;border:1px solid var(--border);padding:.45rem .7rem;border-radius:.5rem;cursor:pointer;margin-left:.5rem}
 .btn:hover{opacity:.92}.btn-outline:hover{background:#f1f5f9}
 
-.years,.scale{display:grid;gap:.35rem}
-.scale-title{font-weight:700;margin-top:.35rem}
-
+.years{display:grid;gap:.35rem}
 .legend.heat{margin-top:.75rem}
 .legend-bar{height:10px;width:100%;border-radius:4px;background:linear-gradient(90deg, green, yellow, red);border:1px solid var(--border)}
 .legend-scale{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-top:.25rem}

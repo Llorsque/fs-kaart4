@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>School Kaart — Heatmap met contrast</title>
-  <meta name="description" content="Pins & heatmap met schaalopties: Vast (10–170), Auto (min–max), Percentiel (P10–P90)." />
+  <title>School Kaart — Pins (gekleurde) & Heatmap (10–170)</title>
+  <meta name="description" content="Upload Excel/CSV en toon scholen als gekleurde pins of heatmap. 'NEE' of getal per jaar.">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E">
@@ -13,7 +13,7 @@
   <header class="site-header">
     <div class="container">
       <h1>School Kaart</h1>
-      <p>Upload Excel/CSV met <strong>NAAM SCHOOL</strong>, <strong>LONGITUDE</strong>, <strong>LATITUDE</strong>, en jaren <strong>2022/2023</strong> t/m <strong>2025/2026</strong> (per cel <em>NEE</em> of een <em>getal</em>).</p>
+      <p>Kolommen: <strong>NAAM SCHOOL</strong>, <strong>LONGITUDE</strong>, <strong>LATITUDE</strong>, <strong>2022/2023</strong> t/m <strong>2025/2026</strong>. In jaarkolommen staat <em>NEE</em> of een <em>getal</em>.</p>
     </div>
   </header>
 
@@ -24,6 +24,7 @@
           <h2>Bestand uploaden</h2>
           <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" />
           <button id="loadSample" class="btn-outline" type="button">Laad voorbeeld</button>
+          <p class="hint">Komma of punt in coördinaten is oké.</p>
           <div id="status" class="hint" aria-live="polite"></div>
         </section>
 
@@ -41,18 +42,12 @@
         <section class="panel">
           <h2>Weergave</h2>
           <div class="view-toggle">
-            <label><input type="radio" name="viewmode" value="pins" checked> Pins</label>
+            <label><input type="radio" name="viewmode" value="pins" checked> Pins (gekleurd)</label>
             <label><input type="radio" name="viewmode" value="heat"> Heatmap</label>
-          </div>
-          <div class="scale">
-            <div class="scale-title">Schaal</div>
-            <label><input type="radio" name="scaleMode" value="fixed" checked> Vast (10–170)</label>
-            <label><input type="radio" name="scaleMode" value="auto"> Auto (min–max)</label>
-            <label><input type="radio" name="scaleMode" value="percentile"> Percentiel (P10–P90)</label>
           </div>
           <div class="legend heat">
             <div class="legend-bar"></div>
-            <div class="legend-scale"><span id="legendMin">10</span><span id="legendMax">170</span></div>
+            <div class="legend-scale"><span>10 (groen)</span><span>170 (rood)</span></div>
           </div>
         </section>
       </aside>
