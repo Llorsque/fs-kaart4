@@ -28,6 +28,7 @@ function bindUI(){
   document.querySelectorAll('input[name="viewmode"]').forEach(r=>r.addEventListener('change',()=>{ if(originalRows.length) render(); }));
   document.getElementById('applyFilter').addEventListener('click',()=>{ if(originalRows.length) render(); });
   document.getElementById('loadSample').addEventListener('click',loadSample);
+  const np=document.getElementById('showNonParticipants'); if(np){ np.addEventListener('change', ()=>{ if(originalRows.length) render(); }); }
 }
 
 function setStatus(msg,isError=false){ const el=document.getElementById('status'); el.textContent=msg||''; el.style.color=isError?'#b42318':'#64748b'; }
@@ -47,6 +48,7 @@ function resolveColumns(rows){
 
 function selectedYears(){ return Array.from(document.querySelectorAll('input[name="year"]:checked')).map(i=>i.value); }
 function mode(){ const el=document.querySelector('input[name="viewmode"]:checked'); return el?el.value:'pins'; }
+function showNonParticipants(){ const el=document.getElementById('showNonParticipants'); return !!(el && el.checked); }
 
 function pinColor(total){ if(total>PIN_THRESHOLDS.high) return PIN_COLORS.high; if(total>=PIN_THRESHOLDS.low) return PIN_COLORS.mid; return PIN_COLORS.low; }
 
@@ -60,6 +62,7 @@ function render(){
   const years = selectedYears();
   const m = mode();
   const heat=[], bounds=[];
+  const wantNP = showNonParticipants();
 
   originalRows.forEach((row, idx)=>{
     const lon=normalizeNumber(row[lonKey]); const lat=normalizeNumber(row[latKey]);
@@ -67,31 +70,42 @@ function render(){
 
     const iter = years.length? years:YEARS;
     const perYear = {};
-    let include=false, total=0;
+    let include=false, total=0, allNee=true;
     iter.forEach(y=>{
       const val=asNumericOrNull(row[y]);
       perYear[y] = (val==null? 'NEE' : val);
-      if(val!=null){ include=true; total += val; }
+      if(val!=null){ include=true; total += val; allNee=false; }
     });
-    if(!include) return;
 
-    if(m==='pins'){
-      const name = nameKey? row[nameKey] : `Locatie ${idx+1}`;
-      const color = pinColor(total);
-      const marker=L.circleMarker([lat,lon],{radius:8,weight:1.5,color,fillColor:color,fillOpacity:.9});
-      const details = YEARS.map(y=> `<li>${y}: <strong>${(asNumericOrNull(row[y])??'NEE')}</strong></li>`).join('');
-      marker.bindPopup(`<div style="min-width:240px"><strong>${String(name??'')}</strong><ul style="padding-left:1rem;margin:.4rem 0 0">${details}</ul><div style="margin-top:.45rem;color:#64748b">Totaal (geselecteerd): <strong>${total}</strong></div></div>`);
-      marker.addTo(markersLayer);
-    }else{
-      heat.push([lat,lon,total]);
+    if(include){
+      if(m==='pins'){
+        const name = nameKey? row[nameKey] : `Locatie ${idx+1}`;
+        const color = pinColor(total);
+        const marker=L.circleMarker([lat,lon],{radius:8,weight:1.5,color,fillColor:color,fillOpacity:.9});
+        const details = YEARS.map(y=> `<li>${y}: <strong>${(asNumericOrNull(row[y])??'NEE')}</strong></li>`).join('');
+        marker.bindPopup(`<div style="min-width:240px"><strong>${String(name??'')}</strong><ul style="padding-left:1rem;margin:.4rem 0 0">${details}</ul><div style="margin-top:.45rem;color:#64748b">Totaal (geselecteerd): <strong>${total}</strong></div></div>`);
+        marker.addTo(markersLayer);
+      }else{
+        heat.push([lat,lon,total]);
+      }
+      bounds.push([lat,lon]);
+      return;
     }
-    bounds.push([lat,lon]);
+
+    if(wantNP && allNee && m==='pins'){
+      const name = nameKey? row[nameKey] : `Locatie ${idx+1}`;
+      const color = '#9ca3af';
+      const marker=L.circleMarker([lat,lon],{radius:7,weight:1.2,color:color,fillColor:color,fillOpacity:.7});
+      const details = YEARS.map(y=> `<li>${y}: <strong>${(asNumericOrNull(row[y])??'NEE')}</strong></li>`).join('');
+      marker.bindPopup(`<div style="min-width:240px"><strong>${String(name??'')}</strong><div style="margin:.25rem 0 .35rem;color:#475569">Geen deelname in geselecteerde jaren</div><ul style="padding-left:1rem;margin:0">${details}</ul></div>`);
+      marker.addTo(markersLayer);
+      bounds.push([lat,lon]);
+    }
   });
 
   if(m==='heat'){
     if(!ensureHeatLayer()) return;
     const MIN=10, MAX=170, FLOOR=0.12;
-    // Add to map first, then set data to avoid getSize null errors
     if(!map.hasLayer(heatLayer)) heatLayer.addTo(map);
     const pts = heat.map(([lat,lon,t])=>{
       const clamped=Math.max(MIN, Math.min(MAX, (t||0)));
@@ -105,7 +119,6 @@ function render(){
   if(bounds.length) map.fitBounds(bounds,{padding:[30,30]});
   setStatus(`Klaar — ${bounds.length} locaties.`);
 }
-
 async function handleFile(file){
   if(!file) return; setStatus('Bestand wordt verwerkt…');
   const ext=file.name.split('.').pop().toLowerCase();
