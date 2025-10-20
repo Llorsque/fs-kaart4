@@ -2,6 +2,17 @@
 let rawRows = [];
 const YEARS = ["2022/2023","2023/2024","2024/2025","2025/2026"];
 
+
+// ---- Chart.js aesthetics ----
+Chart.defaults.color = '#cbd5e1';
+Chart.defaults.font.family = 'Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
+Chart.defaults.borderColor = 'rgba(148,163,184,0.25)';
+Chart.defaults.scale.grid.color = 'rgba(148,163,184,0.15)';
+Chart.defaults.plugins.legend.labels.boxWidth = 14;
+Chart.defaults.elements.bar.borderRadius = 6;
+Chart.defaults.elements.point.radius = 3;
+Chart.defaults.elements.line.borderWidth = 2.5;
+
 document.addEventListener('DOMContentLoaded', () => {
   buildYearChecks(); bindUI();
 });

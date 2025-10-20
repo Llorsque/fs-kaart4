@@ -3,39 +3,46 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dashboard Scholen — v2</title>
+  <title>Dashboard Scholen — v2 Pro</title>
   <meta name="description" content="Selecteer jaren en bekijk totals, groei, actieve/niet-actieve scholen, en highlights." />
-  <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header class="site-header">
-    <div class="container">
-      <h1>Dashboard Scholen</h1>
-      <p class="muted">Upload Excel/CSV met kolommen <strong>NAAM SCHOOL</strong>, <strong>LONGITUDE</strong>, <strong>LATITUDE</strong> en jaren <strong>2022/2023</strong> t/m <strong>2025/2026</strong>. Cellen zijn <em>NEE</em> of een <em>getal</em>.</p>
+    <div class="container header-inner">
+      <div class="brand">
+        <div class="logo">📊</div>
+        <div class="titles">
+          <h1>Dashboard Scholen</h1>
+          <p class="muted">Upload Excel/CSV met <strong>NAAM SCHOOL</strong>, <strong>LONGITUDE</strong>, <strong>LATITUDE</strong> en jaren <strong>2022/2023</strong> t/m <strong>2025/2026</strong>. Cellen zijn <em>NEE</em> of een <em>getal</em>.</p>
+        </div>
+      </div>
     </div>
   </header>
 
-  <main class="container">
-    <div class="layout">
+  <main>
+    <div class="container layout">
       <aside class="sidebar">
         <section class="panel">
-          <h2>Bestand</h2>
-          <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" />
-          <button id="loadSample" class="btn-outline" type="button">Laad voorbeeld</button>
-          <p class="muted small">Komma of punt in getallen is oké.</p>
-          <div id="status" class="muted" aria-live="polite"></div>
+          <h2 class="panel-title">Bestand</h2>
+          <div class="control">
+            <input class="file" type="file" id="fileInput" accept=".xlsx,.xls,.csv" />
+            <button id="loadSample" class="btn ghost" type="button">Laad voorbeeld</button>
+          </div>
+          <p class="muted tiny">Komma of punt in getallen is oké.</p>
+          <div id="status" class="muted tiny" aria-live="polite"></div>
         </section>
 
         <section class="panel">
-          <h2>Jaren</h2>
+          <h2 class="panel-title">Jaren</h2>
           <div id="yearChecks" class="years"></div>
-          <button id="apply" class="btn" type="button">Toepassen</button>
+          <button id="apply" class="btn primary" type="button">Toepassen</button>
         </section>
 
         <section class="panel">
-          <h2>Opties</h2>
-          <label class="row">
+          <h2 class="panel-title">Opties</h2>
+          <label class="check">
             <input type="checkbox" id="treatJaAsOne" />
             <span>Als er <b>JA</b> staat, tel als 1</span>
           </label>
@@ -43,53 +50,62 @@
       </aside>
 
       <section class="content">
-        <div id="noticeEmpty" class="empty hide">Selecteer één of meerdere jaren om het dashboard te tonen.</div>
+        <div id="noticeEmpty" class="empty card hide">Selecteer één of meerdere jaren om het dashboard te tonen.</div>
 
-        <div id="kpiWrap" class="kpis-grid hide">
-          <div class="kpi"><div class="label">Totaal (som) — selectie</div><div id="kpiTotal" class="value">—</div></div>
-          <div class="kpi"><div class="label">Groei % j/j (laatste vs vorig)</div><div id="kpiYoY" class="value">—</div></div>
-          <div class="kpi"><div class="label">Actieve scholen (per geselecteerd jaar, som)</div><div id="kpiActive" class="value">—</div></div>
-          <div class="kpi"><div class="label">Niet-actieve scholen (per geselecteerd jaar, som)</div><div id="kpiInactive" class="value">—</div></div>
-        </div>
+        <section id="kpiWrap" class="kpis card-grid hide">
+          <div class="kpi card">
+            <div class="kpi-label">Totaal (som) — selectie</div>
+            <div id="kpiTotal" class="kpi-value"></div>
+          </div>
+          <div class="kpi card">
+            <div class="kpi-label">Groei % j/j (laatste vs vorig)</div>
+            <div id="kpiYoY" class="kpi-value"></div>
+          </div>
+          <div class="kpi card">
+            <div class="kpi-label">Actieve scholen (som per jaar)</div>
+            <div id="kpiActive" class="kpi-value"></div>
+          </div>
+          <div class="kpi card">
+            <div class="kpi-label">Niet-actieve scholen (som per jaar)</div>
+            <div id="kpiInactive" class="kpi-value"></div>
+          </div>
+        </section>
 
-        <div class="cards hide" id="cards">
+        <section id="cards" class="cards-grid hide">
           <div class="card">
-            <h3>Totaal per jaar</h3>
+            <div class="card-head"><h3>Totaal per jaar</h3></div>
             <canvas id="chartTotals"></canvas>
           </div>
           <div class="card">
-            <h3>Groei % jaar-op-jaar</h3>
+            <div class="card-head"><h3>Groei % jaar-op-jaar</h3></div>
             <canvas id="chartYoY"></canvas>
           </div>
           <div class="card">
-            <h3>Actief vs Niet-actief per jaar</h3>
+            <div class="card-head"><h3>Actief vs Niet-actief per jaar</h3></div>
             <canvas id="chartActive"></canvas>
           </div>
           <div class="card">
-            <h3>Highlights</h3>
+            <div class="card-head"><h3>Highlights</h3></div>
             <div id="highlights" class="highlights"></div>
           </div>
-        </div>
+        </section>
 
-        <details class="panel" id="preview" open>
-          <summary><strong>Datapreview</strong> (eerste 20 rijen)</summary>
+        <section class="card">
+          <div class="card-head"><h3>Datapreview (eerste 20 rijen)</h3></div>
           <div id="tablePreview" class="table-wrap"></div>
-        </details>
+        </section>
       </section>
     </div>
   </main>
 
   <footer class="site-footer">
     <div class="container">
-      <small>© 2025 — Dashboard Scholen v2</small>
+      <small>© 2025 — Dashboard Scholen v2 Pro</small>
     </div>
   </footer>
 
-  <!-- Libs -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
-  <!-- App -->
   <script src="app.js"></script>
 </body>
 </html>
